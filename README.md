@@ -1,2 +1,0 @@
-# jmoudrik.github.io
-blog
