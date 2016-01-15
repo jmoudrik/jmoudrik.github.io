@@ -129,33 +129,36 @@ We can clearly see that the error is the highest at the beginning and end.
 Because games of beginners usually look the same to games of strong players at the 
 beginning (first few moves are usually very similar) the first half is not surprising.
 The fact that the error grows so steeply in the end is probably caused by the fact, that
-there are only few very long games (usually game takes about 250-300 moves).
+there are only few very long games in the dataset (usually game takes about 250&ndash;300 moves).
 Before discussing whether are these numbers any good, let's have a look on another graph,
 error by rank:
 
 <img src="/static/20160114/err_by_rank.png" />
 
-This graph basically shows, that hardest players to be predicted are both very strong and
-very weak players. A graph of a predictor which would predict just the middle class would
+This graph basically shows, that hardest ranks to be predicted correspond to both very strong and
+very weak players. A graph of a predictor which would always predict just the middle class would
 look like a letter "V" with the minimum in the middle. This graph has more of a "U" shape,
-which is good, because it means, that the network is not only utilising statistical
-distribution of target $$y$$'s but also some knowledge. Comparing with the naive V predictor
-is also interesting in terms of error. Were the 24 $$y$$ values distributed
-[uniformly randomly][uniform]
+which is good, because it means that the network is not only utilising statistical
+distribution of target $$y$$'s but also has some knowledge understanding of data.
+Comparing with the naive V predictor
+is also interesting in terms of error. Were the 24 values of $$y$$ distributed
+[uniformly randomly][uniform],
 the standard deviation of the always-the-middle V predictor would be `
 
 $$\sigma^2 = Var(U(0,24)) = \frac{24^2}{12} = 6.93^2$$
 
-On average, the network has $$RMSE$$ (root of mean square error) or 4.66. The $$RMSE$$ has
+On average, the network has $$RMSE$$ (root of mean square error) or **4.66**. The $$RMSE$$ has
 the nice property that (under certain assumptions), it is estimate of the $$\sigma$$,
-so we can say, that the network actually does something useful.
+so we can say, that the network actually does something useful. This is of course
+a mediocre comparison, and one would hope for the network to be much better than the
+simplest reference.
 
 
 ### Comparison With Prior Work ###
 
 In my recent paper [Evaluating Go game records for prediction of player attributes][eval2],
-different features were able (with a given good model) to predict the strength with
-the following $$RMSE$$:
+different features were extracted from games (samples of 10&ndash;40 them), and given
+a good predictive model, it was possible to predict the strength with the following $$RMSE$$:
 
 * 2.788 Pattern feature
 * 5.765 Local sequences
@@ -165,9 +168,12 @@ the following $$RMSE$$:
 * 5.116 Win/Loss points
 
 The results in the paper had a slightly bigger domain of 26 ranks instead of 24, but roughly
-it is comparable. So 4.66 of our brave new deep network is better than all but
-the dominating feature, and this from just one game position with history of size 4.
-Cool indeed!
+the numbers are still comparable. So **4.66** our brave new simplistic deep network has is better
+than all but the dominating feature (extracted from at least 10 games), and this from just
+one game position with history of size 4. Given that average game in the dataset is about 190
+moves long, 10 games is 380 times more information than the network has.
+
+**Cool indeed!**
 
 
 ### What next? ###
