@@ -9,7 +9,8 @@
 title: JM's blog
 email: J.Moudrik@gmail.com
 description: > # this means to ignore newlines until "baseurl:"
-    My humble personal blog.
+    My humble personal blog. Hopefuly, the fact that it is humble in content
+    will soon change.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "http://jmoudrik.github.io" # the base hostname & protocol for your site
 homepage: "http://j2m.cz/~jm/"
