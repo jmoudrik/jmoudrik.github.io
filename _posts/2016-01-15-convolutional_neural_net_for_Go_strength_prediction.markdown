@@ -15,9 +15,9 @@ are most welcome).
 Introduction
 ----
 
-Now, about the actual subject. As probably everyone around nowadays,
+Now about the actual subject. As probably everyone around nowadays,
 I've been toying with deep learning recently. The domain of my interest
-is [computer Go](https://en.wikipedia.org/wiki/Computer_Go),
+is [computer Go](https://en.wikipedia.org/wiki/Computer_Go)
 and since the Go board is essentially a 19x19
 bitmap with spatial properties, convolutional neural nets are clear choice.
 Most researchers in computer Go are trying to make strong computer programs
@@ -41,24 +41,25 @@ Strength Prediction
 ----
 
 In the past, I've been working on predicting Go player's strength and playing
-style, see [Gostyle Project][gostyle], so I wanted to try how
+style ([Gostyle Project][gostyle]), so I wanted to try how
 good are CNN's there. The idea is to give the network a position and teach it
 what are the players' strengths instead of predicting the good move.
 In Go the strength is measured in 
 [kyu/dan ranks](https://en.wikipedia.org/wiki/Go_ranks_and_ratings);
-for us, imagine we have a scale of, say, 24 ranks. The ranks have ordering
+for us, imagine we have a scale of &mdash; say &mdash; 24 ranks. The ranks have ordering
 (rank 1 is stronger player than rank 2), so regression seems like a good choice
-to begin with.
+to begin the experiments with.
 
 ### Dataset ###
 
-I used some 71119 games from the [KGS Archives](https://www.gokgs.com/archives.jsp).
-Each game has on average cca 190 moves, so in the end, we have almost 14 million
+I used some 71,119 games from the [KGS Archives](https://www.gokgs.com/archives.jsp).
+Each game has on average circa 190 moves, so in the end we have almost 14 million
 pairs $$(X, y)$$ for training. First we need to make the dataset. The $$y$$'s are clear,
 we only need to rescale black and white's strength. For $$X$$'s we need to define
-planes, here I used the following 13 planes:
+and extract data planes from the games, here I used the following 13 planes:
 
 {% highlight python %}
+	
     plane[0] = num_our_liberties == 1
     plane[1] = num_our_liberties == 2
     plane[2] = num_our_liberties == 3
@@ -76,9 +77,9 @@ planes, here I used the following 13 planes:
     plane[12] = history_played_before == 4
 {% endhighlight %}
 
-This is almost the source code in the tool (below).
+This is almost the source code in a tool I made (below).
 Basically the right sides are numpy arrays with some simple domain knowledge (for
-instance, planes 9 to 12 show list last 4 moves).
+instance, planes 9 to 12 list the last 4 moves).
 The planes are basically a simple extension of the
 [Clark, Storkey 2014][clark2014] paper with the history moves and were proposed by 
 [Detlef Schmicker](http://computer-go.org/pipermail/computer-go/2015-December/008324.html).
@@ -93,8 +94,8 @@ cat game_filenames | sort -R | ./make_dataset.py -l ranks -p detlef  out.hdf
 
 ### Network ###
 
-Now, the network. Since this is more like a proof-of-concept experiment, the network
-used was fairly simple to have fast training, so I went with a few convolutions with
+Now, the network. Since this is more like a proof-of-concept experiment, I went
+with a fairly simple network to have fast training. I used a few convolutions with
 a small dropout dense layer atop and 2 output neurons for strengths of the players.
 
  1. convolutional layer 128 times 5x5 filters, ReLU activation
@@ -104,16 +105,16 @@ a small dropout dense layer atop and 2 output neurons for strengths of the playe
  1. dense layer with 64 neurons, ReLU activation, 0.5 dropout
  1. 2 output neurons, linear activation
 
-For implementation, I used the [keras.io](http://keras.io/) library.
-The model [can be found here](/static/20160114/keras_model.py).
+I used the [keras.io](http://keras.io/) library for implementation of the model,
+which [can be found here](/static/20160114/keras_model.py).
 The network was trained for just 2 epochs with [Adam](http://arxiv.org/abs/1412.6980v8)
-optimizer, because is converged pretty quickly. I have a bigger network
+optimizer, because it converged pretty quickly. I have a bigger network
 in training (using RMSProp), but it will take some time, so let's have
 a look on results in the meantime ;-)
 
 ### Results ###
 
-So basically, we now have a network which predicts strength of both players
+Basically, we now have a network which predicts strength of both players
 from a single position (plus history of 4 last moves). This would be really
 cool if it worked, as we've previously recommended at least a sample of 10 games
 in our [GoStyle webapp][webapp] to predict strength somewhat reliably.
@@ -121,43 +122,44 @@ in our [GoStyle webapp][webapp] to predict strength somewhat reliably.
 So, how good this really simple first-shot network &mdash; trained for quite a short time,
 without any fine-tuning &mdash; performs? And what would a good result be?
 Lets have a look on dependency of error (difference between wanted and predicted
-value) on move number.
+strength) on move number.
 
 <img src="/static/20160114/err_by_move.png" />
 
 We can clearly see that the error is the highest at the beginning and end.
 Because games of beginners usually look the same to games of strong players at the 
-beginning (first few moves are usually very similar) the first half is not surprising.
-The fact that the error grows so steeply in the end is probably caused by the fact, that
-there are only few very long games in the dataset (usually game takes about 250&ndash;300 moves).
-Before discussing whether are these numbers any good, let's have a look on another graph,
+beginning (first few moves are usually very similar) the first half of the statement is not really
+surprising.
+On the other hand, the fact that the error grows so steeply in the end is probably caused by the fact
+that
+there are only few very long games in the dataset (usual game takes about 250&ndash;300 moves).
+Before discussing whether these numbers are any good, let's have a look on another graph,
 error by rank:
 
 <img src="/static/20160114/err_by_rank.png" />
 
-This graph basically shows, that hardest ranks to be predicted correspond to both very strong and
+This graph basically shows that hardest ranks to be predicted correspond to both very strong and
 very weak players. A graph of a predictor which would always predict just the middle class would
 look like a letter "V" with the minimum in the middle. This graph has more of a "U" shape,
 which is good, because it means that the network is not only utilising statistical
-distribution of target $$y$$'s but also has some knowledge understanding of data.
+distribution of target $$y$$'s but also has some understanding of the data.
 Comparing with the naive V predictor
 is also interesting in terms of error. Were the 24 values of $$y$$ distributed
 [uniformly randomly][uniform],
 the standard deviation of the always-the-middle V predictor would be `
 
-$$\sigma^2 = Var(U(0,24)) = \frac{24^2}{12} = 6.93^2$$
+$$\sigma = \sqrt{Var(U(0,24))} = \sqrt{\frac{24^2}{12}} = 6.93$$
 
 On average, the network has $$RMSE$$ (root of mean square error) or **4.66**. The $$RMSE$$ has
-the nice property that (under certain assumptions), it is estimate of the $$\sigma$$,
-so we can say, that the network actually does something useful. This is of course
-a mediocre comparison, and one would hope for the network to be much better than the
-simplest reference.
-
+a nice property that (under certain assumptions) it is an estimate of the $$\sigma$$.
+So by comparing 4.66 and 6.93, we can say that the network actually does something useful.
+This is of course a mediocre comparison and one would hope for the network to be much better
+than the simplest possible reference.
 
 ### Comparison With Prior Work ###
 
 In my recent paper [Evaluating Go game records for prediction of player attributes][eval2],
-different features were extracted from games (samples of 10&ndash;40 them), and given
+different features were extracted from games (samples of 10&ndash;40 them) and given
 a good predictive model, it was possible to predict the strength with the following $$RMSE$$:
 
 * 2.788 Pattern feature
